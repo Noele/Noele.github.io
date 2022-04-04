@@ -1,0 +1,20 @@
+body {
+    background-color: gray;
+    overflow: hidden;
+}
+.camera {
+    z-index: 8;
+}
+
+.zoom-container {
+    text-align: center;
+    height: 90vh;
+}
+
+#canvas {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: white;
+}
