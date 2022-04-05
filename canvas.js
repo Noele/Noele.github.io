@@ -2,9 +2,12 @@ let dragging = false;
 let mousePosition = {x:0, y:0}
 let canvas;
 let zoom = 8;
+let zoomMin = 1;
+let zoomMax = 30
+let pos;
 let ctx;
 let pixelCountWidth = 100;
-let pixelCountHeight = 100
+let pixelCountHeight = 100;
 let colours = [
     "#FF0000", "#FF8000", "#FFFF00", "#80FF00",
     "#00FF00", "#00FF80", "#00FFFF", "#0080FF",
@@ -15,18 +18,20 @@ let sampledata = [   12,   9,   8,   13,   10,   7,   3,   4,   8,   0,   4,   1
 
 document.addEventListener('DOMContentLoaded', function() {
     document.addEventListener('mousedown', e=>mousedown(e));
+    document.addEventListener('mousemove', e=>mousemove(e));
     document.addEventListener('touchstart', e=>touchstart(e));
     document.addEventListener("wheel", e=>wheel(e));
 
+    pos = document.getElementById("pos");
     canvas = document.getElementById("canvas");
-
     ctx = canvas.getContext("2d");
-    changeResolution(canvas, 10);
+
+    changeResolution(canvas, 100);
     canvas.style["transform"] = 'scale(' + zoom + ')';
 
     for (const [index, pixel] of sampledata.entries()) {
         let y = (index / pixelCountHeight) >> 0;
-        let x = index - (pixelCountHeight * y);
+        let x = index - (pixelCountWidth * y);
         ctx.fillStyle = colours[pixel];
         ctx.fillRect(x, y, 1, 1);
     }
@@ -35,14 +40,14 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function changeResolution(canvas, scaleFactor) {
-    canvas.style.width = canvas.style.width || canvas.width + 'px';
-    canvas.style.height = canvas.style.height || canvas.height + 'px';
+    canvas.style.width = canvas.width + 'px';
+    canvas.style.height =  canvas.height + 'px';
 
 
     canvas.width = Math.ceil(canvas.width * scaleFactor);
     canvas.height = Math.ceil(canvas.height * scaleFactor);
+    console.log(canvas.width);
 
-    let ctx = canvas.getContext('2d');
     ctx.scale(scaleFactor, scaleFactor);
 }
 
@@ -51,19 +56,35 @@ function mousemove(e) {
     if(dragging) {
         let offsetX = mousePosition.x - e.clientX;
         let offsetY = mousePosition.y - e.clientY;
+
         mousePosition.x = e.x;
         mousePosition.y = e.y;
+
         canvas.style.top = (canvas.offsetTop - offsetY) + "px";
         canvas.style.left = (canvas.offsetLeft - offsetX) + "px";
-
     }
+
+    let canvasClientRect = canvas.getBoundingClientRect()
+    let elementRelativeX = e.clientX - canvasClientRect.left;
+    let elementRelativeY = e.clientY - canvasClientRect.top;
+
+    let canvasRelativeX = Math.trunc((elementRelativeX * canvas.width / canvasClientRect.width) / 100); // Do not round.
+    let canvasRelativeY = Math.trunc((elementRelativeY * canvas.height / canvasClientRect.height) / 100);
+    canvasRelativeX = canvasRelativeX > -1 && canvasRelativeX < pixelCountWidth ? canvasRelativeX : "NA";
+    canvasRelativeY = canvasRelativeY > -1 && canvasRelativeY < pixelCountHeight ? canvasRelativeY : "NA";
+    if(canvasRelativeX === "NA" || canvasRelativeY === "NA") {
+        canvasRelativeX = "NA";
+        canvasRelativeY = "NA";
+    }
+
+    pos.innerText = "(" + canvasRelativeX + ", " + canvasRelativeY + ")";
 }
+
 function mousedown(e) {
     dragging=true;
     mousePosition.x = e.clientX;
     mousePosition.y = e.clientY;
-    document.onmouseup = cleanup;
-    document.onmousemove = mousemove;
+    document.onmouseup = mouseup;
 }
 
 function touchstart(e) {
@@ -74,16 +95,15 @@ function touchstart(e) {
     document.onmousemove = mousemove;
 }
 
-function cleanup() {
-    document.onmouseup = null;
-    document.onmousemove = null;
+function mouseup() {
+    dragging = false;
 }
 
 function wheel(e) {
     if(e.deltaY < 0) {
-        zoom = Math.min(zoom += 1, 10);
+        zoom = Math.min(zoom += 1, zoomMax);
     } else {
-        zoom = Math.max(zoom -= 1, 1);
+        zoom = Math.max(zoom -= 1, zoomMin);
     }
     canvas.style["transform"] = 'scale(' + zoom + ')';
 }
