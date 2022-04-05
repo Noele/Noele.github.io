@@ -2,16 +2,27 @@ body {
     background-color: #303030;
     overflow: hidden;
 }
-
-.camera {
-    z-index: 8;
-}
-
-.zoom-container {
+.Controls {
+    z-index: 2;
+    position: absolute;
     text-align: center;
-    height: 90vh;
+    bottom: 9em;
 }
-
+#submit {
+    width: 150px;
+    height: 50px;
+}
+.block {
+    border-color: black;
+    border-width: 50px;
+    display: inline-block;
+}
+#submit {
+    border: hidden;
+    font-family: Arial,Helvetica,sans-serif;
+    font-weight : bold ;
+    font-size: 25px;
+}
 
 #canvas {
     position: absolute;
@@ -20,9 +31,11 @@ body {
     transform: translate(-50%, -50%);
     background-color: white;
     border: none;
+    z-index: 1;
 }
 
 .bubble {
+    z-index: 1;
     border-radius: 25px;
     font-family: sans-serif;
     position: absolute;
@@ -33,7 +46,7 @@ body {
     padding: 20px;
 }
 .bubble p {
-    padding-top: 3%;
+    margin-top: 5px;
     color: black;
     text-align: center;
     font-size: 30px;
