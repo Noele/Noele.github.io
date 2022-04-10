@@ -3,10 +3,13 @@ let mousePosition = {x:0, y:0};
 let mouseDownPosition = {x:0, y:0};
 
 let canvas;
-let hoc;
-let sp;
+let canvasDefaultPosition = {top:0, left:0};
+let hoveredOverCoords;
+let selectedPixelText;
 let ctx;
 let colourBlocks;
+let menuItems;
+
 let zoom = 8;
 let zoomMin = 1;
 let zoomMax = 30
@@ -32,16 +35,21 @@ let colours = [
 
 document.addEventListener('DOMContentLoaded', function() {
     document.addEventListener('mousedown', e=>mousedown(e));
-    document.addEventListener('mousemove', e=>mousemove(e));
     document.addEventListener("wheel", e=>wheel(e));
+    document.addEventListener('mousemove', e=>mousemove(e));
+
 
     colourBlocks = document.getElementsByClassName("block");
-    hoc = document.getElementById("HoveredOverCoords");
+    menuItems = document.getElementsByClassName("menuitem");
+    hoveredOverCoords = document.getElementById("HoveredOverCoords");
     submitButton = document.getElementById("submit");
-    sp = document.getElementById("SelectedPixel");
+    selectedPixelText = document.getElementById("SelectedPixel");
     canvas = document.getElementById("canvas");
 
     ctx = canvas.getContext("2d");
+
+    canvasDefaultPosition.top = canvas.style.top;
+    canvasDefaultPosition.left = canvas.style.left;
 
     canvas.style["transform"] = 'scale(' + zoom + ')';
 
@@ -77,7 +85,7 @@ function mousemove(e) {
     mousedOverPixel.x = mousedOverPixel.x > -1 && mousedOverPixel.x < pixelCountWidth ? mousedOverPixel.x : null;
     mousedOverPixel.y = mousedOverPixel.y > -1 && mousedOverPixel.y < pixelCountHeight ? mousedOverPixel.y : null;
 
-    hoc.innerText = "(" + (mousedOverPixel.x != null && mousedOverPixel.y != null ? mousedOverPixel.x : "NA") + ", " +
+    hoveredOverCoords.innerText = "(" + (mousedOverPixel.x != null && mousedOverPixel.y != null ? mousedOverPixel.x : "NA") + ", " +
                           (mousedOverPixel.y != null && mousedOverPixel.x != null ? mousedOverPixel.y : "NA") + ")";
 }
 
@@ -108,31 +116,42 @@ function submit() {
     console.log({x: selectedPixel.x, y: selectedPixel.y, colour: selectedColour});
 }
 
+function resetZoom() {
+    zoom = 8;
+    canvas.style["transform"] = 'scale(' + zoom + ')';
+}
+
+function resetPosition() {
+    canvas.style.top = canvasDefaultPosition.top;
+    canvas.style.left = canvasDefaultPosition.left;
+}
 
 function click(e) {
-    let onDiv = false;
-    Array.from(colourBlocks).forEach((item) => {
+    let onMenuItem = false;
+    Array.from(menuItems).forEach((item) => {
         if(AABB(item, e)) {
-            Array.from(colourBlocks).forEach((item) => {   // TO:DO Find a better way of doing this, We need to clear the selection border from
-                if(item.classList.contains("border")) {    // All the other boxes when a new one is selected, Doing 2 iterations feels wrong
-                    item.classList.remove("border");       // but im yet to come up with a solution. (Not a massive deal tbh, just bugs me)
+            onMenuItem = true;
+            if(item.classList.contains("block")) {
+                Array.from(colourBlocks).forEach((item) => {   // TO:DO Find a better way of doing this, We need to clear the selection border from
+                    if (item.classList.contains("border")) {    // All the other boxes when a new one is selected, Doing 2 iterations feels wrong
+                        item.classList.remove("border");       // but im yet to come up with a solution. (Not a massive deal tbh, just bugs me)
+                    }
+                });
+                selectedColour = colours.indexOf(item.id);
+                if (item.id === "#000000") {
+                    document.documentElement.style.setProperty("--animated-border-colour", "white");
+                } else {
+                    document.documentElement.style.setProperty("--animated-border-colour", "black");
                 }
-            });
-            selectedColour = colours.indexOf(item.id);
-            if(item.id === "#000000") {
-                document.documentElement.style.setProperty("--animated-border-colour", "white");
-            } else {
-                document.documentElement.style.setProperty("--animated-border-colour", "black");
+                item.classList.add("border");
             }
-            item.classList.add("border");
-            onDiv = true;
         }
     });
     if(AABB(submitButton, e)) {
-        onDiv = true;
+        onMenuItem = true;
     }
 
-    if (mousedOverPixel.x != null && mousedOverPixel.y != null && !onDiv) { // If the mouse is not outside of the canvas, and is not on one of our colour divs
+    if (mousedOverPixel.x != null && mousedOverPixel.y != null && !onMenuItem) { // If the mouse is not outside of the canvas, and is not on one of our colour divs
         if (selectedPixel.x !== -1) { // Is this the first time we're selecting a pixel ?
             window.clearInterval(intervalFlashingSelectedPixel);
             updatePixel((selectedPixel.y * pixelCountWidth) + selectedPixel.x, selectedPixel.colour, false);
@@ -141,7 +160,7 @@ function click(e) {
         selectedPixel.y = mousedOverPixel.y;
         selectedPixel.colour = clientsideData[(mousedOverPixel.y * pixelCountWidth) + mousedOverPixel.x];
 
-        sp.innerText = "(" + selectedPixel.x + ", " + selectedPixel.y + ")";
+        selectedPixelText.innerText = "(" + selectedPixel.x + ", " + selectedPixel.y + ")";
 
         intervalFlashingSelectedPixel = window.setInterval(function () {
             let id = (selectedPixel.y * pixelCountWidth) + selectedPixel.x;
