@@ -1,7 +1,3 @@
-/**
- * I couldn't figure out the zooming thing, so credit to https://dev.to/stackfindover/zoom-image-point-with-mouse-wheel-11n3 <3
- */
-
 // Canvas
 let ctx;
 let pixelCountWidth = 1800;
