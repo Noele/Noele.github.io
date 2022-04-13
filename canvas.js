@@ -1,31 +1,38 @@
-let dragging = false;
-let mousePosition = {x:0, y:0};
-let mouseDownPosition = {x:0, y:0};
+/**
+ * I couldn't figure out the zooming thing, so credit to https://dev.to/stackfindover/zoom-image-point-with-mouse-wheel-11n3 <3
+ */
 
-let canvas;
-let canvasDefaultPosition = {top:0, left:0};
-let hoveredOverCoords;
-let selectedPixelText;
+// Canvas
 let ctx;
-let colourBlocks;
-let menuItems;
-
-let zoom = 8;
-let zoomMin = 1;
-let zoomMax = 30
-
 let pixelCountWidth = 1800;
 let pixelCountHeight = 900;
 
+// ID/Class Elements
+let colourBlocks;
+let menuItems;
+let hoveredOverCoords;
+let submitButton;
+let selectedPixelText;
+let canvas;
+
+// Panning / Zooming
+let dragging = false;
+let start = { x: 0, y: 0 };
+let zoom;
+let scale = 1;
+let point = {x:0,y:0};
+
+// Bubble / Selection
+let mouseDownPosition = {x:0, y:0};
 let mousedOverPixel = {x:0, y:0};
 let selectedPixel = {x:-1, y:-1, "colour": -1};
 let colourSwitch = false;
-
-let submitButton;
-
 let intervalFlashingSelectedPixel;
-
 let selectedColour = 0;
+
+// Options
+let canvasDefaultPosition = {top:0, left:0};
+
 let colours = [
     "#FF0000", "#FF8000", "#FFFF00", "#80FF00",
     "#00FF00", "#00FF80", "#00FFFF", "#0080FF",
@@ -33,11 +40,21 @@ let colours = [
     "#FFFFFF", "#000000"
 ]
 
+/**
+ * Sets the scale and position of the canvas
+ */
+function setTransform() {
+    zoom.style.transform = "translate(" + point.x + "px, " + point.y + "px) scale(" + scale + ")";
+}
+
+/**
+ * Starts when the page fully loads
+ */
 document.addEventListener('DOMContentLoaded', function() {
     document.addEventListener('mousedown', e=>mousedown(e));
     document.addEventListener("wheel", e=>wheel(e));
     document.addEventListener('mousemove', e=>mousemove(e));
-
+    zoom = document.getElementById("zoom-container")
 
     colourBlocks = document.getElementsByClassName("block");
     menuItems = document.getElementsByClassName("menuitem");
@@ -63,17 +80,17 @@ document.addEventListener('DOMContentLoaded', function() {
     Loop();
 });
 
+/**
+ * Activates on mouse move
+ * @param e
+ */
 function mousemove(e) {
     e.preventDefault();
     if(dragging) {
-        let offsetX = mousePosition.x - e.clientX;
-        let offsetY = mousePosition.y - e.clientY;
+        point.x = (e.clientX - start.x);
+        point.y = (e.clientY - start.y);
+        setTransform();
 
-        mousePosition.x = e.x;
-        mousePosition.y = e.y;
-
-        canvas.style.top = (canvas.offsetTop - offsetY) + "px";
-        canvas.style.left = (canvas.offsetLeft - offsetX) + "px";
     }
 
     let canvasClientRect = canvas.getBoundingClientRect()
@@ -89,13 +106,22 @@ function mousemove(e) {
                           (mousedOverPixel.y != null && mousedOverPixel.x != null ? mousedOverPixel.y : "NA") + ")";
 }
 
+/**
+ * Activates on mouse down
+ * @param e
+ */
 function mousedown(e) {
     dragging=true;
-    mouseDownPosition.x = mousePosition.x = e.clientX;
-    mouseDownPosition.y = mousePosition.y = e.clientY;
+    start = { x: e.clientX - point.x, y: e.clientY - point.y };
+    mouseDownPosition.x = e.x = e.clientX;
+    mouseDownPosition.y = e.y = e.clientY;
     document.onmouseup = mouseup;
 }
 
+/**
+ * Activates on mouse up
+ * @param e
+ */
 function mouseup(e) {
     dragging = false;
 
@@ -105,6 +131,14 @@ function mouseup(e) {
 
     document.onmouseup = null;
 }
+
+/**
+ * Axis aligned bounding box, Checks whether the mouse is inside an element
+ * @param item
+ * @param e
+ * @returns {boolean}
+ * @constructor
+ */
 function AABB(item, e) {
     let rect = item.getBoundingClientRect();
     return e.clientX >= rect.left && e.clientX <= rect.right &&
@@ -112,20 +146,33 @@ function AABB(item, e) {
 
 }
 
+/**
+ * Outputs pixel to console
+ */
 function submit() {
     console.log({x: selectedPixel.x, y: selectedPixel.y, colour: selectedColour});
 }
 
+/**
+ * Resets the zoom of the camera
+ */
 function resetZoom() {
-    zoom = 8;
-    canvas.style["transform"] = 'scale(' + zoom + ')';
+    scale = 1;
+    setTransform();
 }
 
+/**
+ * Resets the position of the camera
+ */
 function resetPosition() {
-    canvas.style.top = canvasDefaultPosition.top;
-    canvas.style.left = canvasDefaultPosition.left;
+    point = {x:0, y:0};
+    setTransform();
 }
 
+/**
+ * Activates on mouse press and release
+ * @param e
+ */
 function click(e) {
     let onMenuItem = false;
     Array.from(menuItems).forEach((item) => {
@@ -173,15 +220,33 @@ function click(e) {
         }, 500);
     }
 }
+
+/**
+ * Activates on mouse wheel
+ * @param e
+ */
 function wheel(e) {
-    if(e.deltaY < 0) { // mousewheel direction check
-        zoom = Math.min(zoom += 1, zoomMax);
-    } else {
-        zoom = Math.max(zoom -= 1, zoomMin);
-    }
-    canvas.style["transform"] = 'scale(' + zoom + ')';
+    if(mousedOverPixel.x === null || mousedOverPixel.y === null) {return}
+    let xs = (e.clientX - point.x) / scale;
+    let ys = (e.clientY - point.y) / scale;
+    let oldScale = scale;
+    (e.deltaY < 0) ? (scale *= 1.2) : (scale /= 1.2);
+
+    if(scale >45 || scale < 0.8){ scale = oldScale; return;}
+
+    point.x = e.clientX - xs * scale;
+    point.y = e.clientY - ys * scale;
+
+    setTransform();
+
 }
 
+/**
+ * Updates a given pixels colour
+ * @param id
+ * @param colour
+ * @param update
+ */
 function updatePixel(id, colour, update) { // This function is sexy and you know it
     let y = (id / pixelCountWidth) >> 0;
     let x = id - (pixelCountWidth * y);
@@ -192,6 +257,10 @@ function updatePixel(id, colour, update) { // This function is sexy and you know
     }
 }
 
+/**
+ * Does nothing, might use it one day idk
+ * @constructor
+ */
 function Loop() {
     requestAnimationFrame(Loop);
 }
