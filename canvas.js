@@ -10,12 +10,13 @@ let hoveredOverCoords;
 let submitButton;
 let selectedPixelText;
 let canvas;
+let loadingScreen;
 
 // Panning / Zooming
 let dragging = false;
 let start = { x: 0, y: 0 };
 let zoom;
-let scale = 1;
+let scale = 0.8;
 let point = {x:0,y:0};
 
 // Bubble / Selection
@@ -52,6 +53,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.addEventListener('mousemove', e=>mousemove(e));
     zoom = document.getElementById("zoom-container")
 
+    loadingScreen = document.getElementById("loading-screen");
     colourBlocks = document.getElementsByClassName("block");
     menuItems = document.getElementsByClassName("menuitem");
     hoveredOverCoords = document.getElementById("HoveredOverCoords");
@@ -61,21 +63,20 @@ document.addEventListener('DOMContentLoaded', function() {
 
     ctx = canvas.getContext("2d");
 
-    canvasDefaultPosition.top = canvas.style.top;
-    canvasDefaultPosition.left = canvas.style.left;
+    setTransform();
 
-    canvas.style["transform"] = 'scale(' + zoom + ')';
+    drawEntireCanvas(clientsideData);
+    loadingScreen.style.visibility = "hidden";
+});
 
-    for (const [index, pixel] of clientsideData.entries()) {
+function drawEntireCanvas(data) {
+    for (const [index, pixel] of data.entries()) {
         let y = (index / pixelCountWidth) >> 0;
         let x = index - (pixelCountWidth * y);
         ctx.fillStyle = colours[pixel];
         ctx.fillRect(x, y, 1, 1);
     }
-
-    Loop();
-});
-
+}
 /**
  * Activates on mouse move
  * @param e
@@ -86,7 +87,6 @@ function mousemove(e) {
         point.x = (e.clientX - start.x);
         point.y = (e.clientY - start.y);
         setTransform();
-
     }
 
     let canvasClientRect = canvas.getBoundingClientRect()
@@ -234,7 +234,6 @@ function wheel(e) {
     point.y = e.clientY - ys * scale;
 
     setTransform();
-
 }
 
 /**
@@ -252,12 +251,3 @@ function updatePixel(id, colour, update) { // This function is sexy and you know
         clientsideData[id] = colour;
     }
 }
-
-/**
- * Does nothing, might use it one day idk
- * @constructor
- */
-function Loop() {
-    requestAnimationFrame(Loop);
-}
-
