@@ -1,0 +1,111 @@
+<!-- base layout by cattie @ jubiland.neocities.org ! -->
+<html lang="en-gb">
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+   <meta property="og:type" content="website">
+   <meta name="robots" content="nosnippet">
+   <meta name="robots" content="max-snippet:0">
+   <meta name="robots" content="noarchive">
+   <meta name="robots" content="notranslate">
+   <meta name="robots" content="nositelinkssearchbox">
+   <meta name="robots" content="max-video-preview:0">
+   <meta name="robots" content="max-image-preview:standard">
+   <meta name="title" content="꒰ site title ꒱">
+   <meta property="og:title" content="꒰ site title ꒱">
+   <meta property="twitter:title" content="꒰ site title ꒱">
+   <meta name="description" content="꒰ site description ꒱">
+   <meta property="og:description" content="꒰ site description ꒱">
+   <meta property="twitter:description" content="꒰ site description ꒱">
+   <meta name="theme-color" content="#EDD0EE">
+   <meta name="url" content="yourwesbiteurl.net">
+   <meta name="identifier-URL" content="yourwesbiteurl.net">
+   <meta name="thumbnail" content="res/preview.webp">
+   <meta property="og:url" content="yourwesbiteurl.net">
+   <meta property="og:title" content="꒰ site title ꒱">
+   <meta property="og:image" content="res/preview.jpeg">
+   <meta property="og:image:type" content="image/jpeg">
+   <meta property="twitter:image" content="res/preview.jpeg">
+   <meta property="twitter:card" content="summary_large_image">
+   <meta name="pinterest" content="nopin" />
+   <meta name="creation_date" content="july 9, 2024">
+   <meta name="copyright" content="your name ©">
+   <meta name="author" content="your name, youremail@gmail.com">
+   <meta name="designer" content="cattie, parfaitkittyangel@gmail.com">
+   <meta name="owner" content="your name, youremail@gmail.com">
+   <link rel="shortcut icon" href="res/favicon.png">
+   <link href="style.css" rel="stylesheet" type="text/css" media="all">
+   <title>꒰ Mari's To:Do List ꒱</title>
+   <script src="https://kikittie.github.io/nso/jquery.js"></script>
+   <script src="https://kikittie.github.io/nso/emoji.js"></script>
+   <script src="tooltip.js"></script>
+</head>
+<body>
+<div id="everything">
+   <div class="window" style="z-index: 1000; left: 180px; top: 21px;">
+      <div class="windowHeader"><strong>Mari's To;DO List <img width="10px" src="res/heart.png"></strong><img class="winminimize" src="res/minimize.png"><img class="winmaximize" src="res/maximize.png"><img class="winclose" src="res/close.png"></div>
+      <div class="wincontent">
+         <div class="container">
+            <div id="main">
+               <h1>Task Checklist</h1>
+
+               <!-- Breakfast -->
+               <label for="breakfast">
+                  <input type="checkbox" id="breakfast">
+                  Breakfast
+               </label><br>
+
+               <!-- Dinner -->
+               <label for="dinner">
+                  <input type="checkbox" id="dinner">
+                  Dinner
+               </label><br>
+
+               <!-- Injections on Tuesday -->
+               <label for="injection">
+                  <input type="checkbox" id="injection">
+                  Injections (Tuesday)
+               </label><br>
+
+               <!-- Brushing teeth at 8 AM and 8 PM -->
+               <label for="brushing-teeth-morning">
+                  <input type="checkbox" id="brushing-teeth-morning">
+                  Brushing Teeth (8 AM)
+               </label><br>
+               <label for="brushing-teeth-evening">
+                  <input type="checkbox" id="brushing-teeth-evening">
+                  Brushing Teeth (8 PM)
+               </label><br>
+
+               <!-- Daily Medication -->
+               <label for="medication">
+                  <input type="checkbox" id="medication">
+                  Daily Medication
+               </label><br>
+
+               <!-- Shower at 2 PM -->
+               <label for="shower">
+                  <input type="checkbox" id="shower">
+                  Shower (2 PM)
+               </label><br><br>
+
+               <!-- Calories input -->
+               <label for="calories">Calories Consumed Today:</label>
+               <input type="number" id="calories" placeholder="Enter calories"><br><br>
+
+            </div>
+            <div id="total-stars">
+               <h3>Total Stars: <span id="total-stars-count">0</span></h3>
+            </div>
+            <div id="kangel"><img width="200px" src="res/kangel.jpeg"></div>
+            <div id="updates" style="max-height: 300px; overflow-y: auto;">
+               <strong>updates</strong><br><br>
+               <!-- Updates will be dynamically added here -->
+            </div>
+         </div>
+      </div>
+   </div>
+</div>
+
+<script src="script.js"></script> <!-- External script -->
+</body>
+</html>
