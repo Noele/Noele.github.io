@@ -1,62 +1,49 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <title>Pixel Canvas</title>
-        <script src="https://kit.fontawesome.com/b40aebda25.js" crossorigin="anonymous"></script>
-        <script src="canvas.js"></script>
-        <script src="menus.js"></script>
-        <script src="sampledata.js"></script>  <!-- This file scares me and crashed Intellij :( -->
-        <link rel="stylesheet" href="style.css">
-
-    </head>
-    <body>
-        <div class="loading-screen" id = "loading-screen">
-            <div id="loader"></div>
-        </div>
-        <div id="help" class = "menuitem" onclick="toggleHelpNav()">
-            <i class="fas fa-question-circle fa-3x"></i>
-        </div>
-        <div id="help-sidenav" class = "menuitem">
-            <p>(Insert super cool name for this project like, "awesome super cool definitely not a r/place clone" here) is an online (not yet :)) pixel art canvas or some shit, idk Thor will come up with something cool to put here im sure of it, also this rainbow text is OTT but im LIVING for it</p>
-            <a href = "https://discord.gg/Pbr8ydpBcG" target="_blank"><i class="fa-brands fa-discord"></i></a>
-        </div>
-        <div id="hamburger" onclick="toggleHamNav()" class = "menuitem">
-            <i class="fas fa-solid fa-bars"></i>
-        </div>
-        <div id="hamburger-sidenav" class = "menuitem">
-            <p onclick="resetZoom()">Reset Zoom</p>
-            <p onclick="resetPosition()">Reset Position</p>
-        </div>
-        <div id="zoom-container">
-            <canvas id="canvas" width="1800" height="900"></canvas>
-        </div>
-        <div class="Controls">
-            <div class="Colours">
-                <div class = "block menuitem" id = "#FF0000" style="background-color: #FF0000; width: 150px; height: 50px"></div>
-                <div class = "block menuitem" id = "#FF8000" style="background-color: #FF8000; width: 150px; height: 50px"></div>
-                <div class = "block menuitem" id = "#FFFF00" style="background-color: #FFFF00; width: 150px; height: 50px"></div>
-                <div class = "block menuitem" id = "#80FF00" style="background-color: #80FF00; width: 150px; height: 50px"></div>
-                <div class = "block menuitem" id = "#00FF00" style="background-color: #00FF00; width: 150px; height: 50px"></div>
-                <div class = "block menuitem" id = "#00FF80" style="background-color: #00FF80; width: 150px; height: 50px"></div>
-                <div class = "block menuitem" id = "#00FFFF" style="background-color: #00FFFF; width: 150px; height: 50px"></div>
-                <div class = "block menuitem" id = "#0080FF" style="background-color: #0080FF; width: 150px; height: 50px"></div>
-                <div class = "block menuitem" id = "#0000FF" style="background-color: #0000FF; width: 150px; height: 50px"></div>
-                <div class = "block menuitem" id = "#8000FF" style="background-color: #8000FF; width: 150px; height: 50px"></div>
-                <div class = "block menuitem" id = "#FF00FF" style="background-color: #FF00FF; width: 150px; height: 50px"></div>
-                <div class = "block menuitem" id = "#FF0080" style="background-color: #FF0080; width: 150px; height: 50px"></div>
-                <div class = "block menuitem" id = "#FFFFFF" style="background-color: #FFFFFF; width: 150px; height: 50px"></div>
-                <div class = "block menuitem" id = "#000000" style="background-color: #000000; width: 150px; height: 50px"></div>
-            </div>
-            <strong>
-            <button id="submit" type="button" onclick="submit()" class = "menuitem">✓</button>
-            </strong>
-        </div>
-        <div class="bubble" id = "bubble">
-            <strong>
-            <p id="HoveredOverCoords">(50, 50)</p>
-            <p id="SelectedPixel">(NA, NA)</p>
-            </strong>
-        </div>
-    </body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NOT EVEN A GOODBYE ...</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap');
+        
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: black;
+            color: white;
+            font-family: 'Montserrat', sans-serif;
+            text-align: center;
+            overflow: hidden;
+            perspective: 800px;
+        }
+        .text {
+            position: absolute;
+            font-size: 4rem;
+            text-transform: uppercase;
+            transition: transform 0.1s ease-out;
+            transform-origin: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="text">NOT EVEN A GOODBYE ...</div>
+    <script>
+        const text = document.querySelector('.text');
+        document.addEventListener('mousemove', (event) => {
+            const { clientX: x, clientY: y } = event;
+            const { innerWidth: width, innerHeight: height } = window;
+            const centerX = width / 2;
+            const centerY = height / 2;
+            const deltaX = (x - centerX) / centerX;
+            const deltaY = (y - centerY) / centerY;
+            const rotateX = deltaY * -40;
+            const rotateY = deltaX * 40;
+            text.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+        });
+    </script>
+</body>
 </html>
