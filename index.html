@@ -7,53 +7,81 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap');
         
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
+        * {
             margin: 0;
-            background-color: black;
-            color: white;
-            font-family: 'Montserrat', sans-serif;
-            text-align: center;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
             overflow: hidden;
-            perspective: 800px;
-            flex-direction: column;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        /* Video Background */
+        .video-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .video-container iframe {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border: none;
+        }
+
+        .video-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5); /* Semi-transparent dark overlay */
+            z-index: 1; /* Ensure it stays on top of the video but behind the text */
+        }
+
+        /* Lowered Centered Text */
+        .content {
+            position: absolute;
+            top: 75%; /* Moved lower down */
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: white;
+            text-transform: uppercase;
+            pointer-events: none; /* Prevent interaction with mouse */
+            perspective: 1000px; /* Added perspective for depth */
         }
 
         .text {
-            position: absolute;
             font-size: 4rem;
-            text-transform: uppercase;
-            transition: transform 0.1s ease-out;
-            transform-origin: center;
             background-image: linear-gradient(to right, #55CDFC, #F5A9B8, #FFFFFF, #D52D00, #FF9B55, #FFFFFF);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-size: 200% 100%;
             animation: colorShift 6s linear infinite;
+            transform-origin: center; /* Ensure the 3D effect centers on the text */
+            transition: transform 0.1s ease-out;
+            display: inline-block; /* Keep text inline-block to prevent movement */
         }
 
         .click-text {
-            position: absolute;
-            bottom: 80px;
+            margin-top: 20px;
             font-size: 2rem;
-            text-transform: uppercase;
             background-image: linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-size: 200% 100%;
             animation: colorShiftClick 6s linear infinite;
-        }
-
-        .video-container {
-            position: absolute;
-            bottom: 0;
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            padding: 10px 0;
         }
 
         @keyframes colorShift {
@@ -69,33 +97,74 @@
     </style>
 </head>
 <body>
-    <div class="text">NOT EVEN A GOODBYE ...</div>
-    <div class="click-text">Click Me</div>
 
     <div class="video-container">
         <iframe 
-            width="560" 
-            height="315" 
-            src="https://www.youtube.com/embed/CTspcr3Iaws?autoplay=1&mute=1" 
+            id="videoFrame"
+            src="https://www.youtube.com/embed/CTspcr3Iaws?autoplay=1&mute=1&loop=1&playlist=CTspcr3Iaws" 
             frameborder="0" 
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
             allowfullscreen>
         </iframe>
     </div>
 
+    <div class="content">
+        <div class="text">NOT EVEN A GOODBYE ...</div>
+    </div>
+
     <script>
         const text = document.querySelector('.text');
+        const video = document.querySelector('#videoFrame');
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const analyser = audioContext.createAnalyser();
+        const sourceNode = audioContext.createMediaElementSource(video);
+
+        // Connect the video audio to the analyser
+        sourceNode.connect(analyser);
+        analyser.connect(audioContext.destination);
+        analyser.fftSize = 256; // Set FFT size (higher gives more detail)
+
+        const bufferLength = analyser.frequencyBinCount;
+        const dataArray = new Uint8Array(bufferLength);
+
+        // Store mouse data
+        let mouseRotationX = 0;
+        let mouseRotationY = 0;
+
+        // Function to animate text based on audio frequency data
+        function animateText() {
+            analyser.getByteFrequencyData(dataArray);
+
+            // Sum up frequencies (you can modify the calculation to adjust sensitivity)
+            const averageFrequency = dataArray.reduce((acc, value) => acc + value, 0) / bufferLength;
+
+            // Map the frequency average to text animation (e.g., text pulsing)
+            const scale = 1 + (averageFrequency / 100); // Pulse scale factor based on frequency
+
+            // Apply pulsing animation to text and combine with mouse movement
+            text.style.transform = `scale(${scale}) rotateX(${mouseRotationX}deg) rotateY(${mouseRotationY}deg)`;
+
+            // Continue animation
+            requestAnimationFrame(animateText);
+        }
+
+        // Play the video and start animation
+        video.onload = () => {
+            audioContext.resume().then(() => {
+                animateText();
+            });
+        };
+
+        // Mouse move interaction
         document.addEventListener('mousemove', (event) => {
             const { clientX: x, clientY: y } = event;
             const { innerWidth: width, innerHeight: height } = window;
             const centerX = width / 2;
             const centerY = height / 2;
-            const deltaX = (x - centerX) / centerX;
-            const deltaY = (y - centerY) / centerY;
-            const rotateX = deltaY * -40;
-            const rotateY = deltaX * 40;
-            text.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+            mouseRotationX = (y - centerY) / centerY * -40; // Negative for reverse effect
+            mouseRotationY = (x - centerX) / centerX * 40;
         });
     </script>
+
 </body>
 </html>
