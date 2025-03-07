@@ -19,6 +19,7 @@
             text-align: center;
             overflow: hidden;
             perspective: 800px;
+            flex-direction: column;
         }
         .text {
             position: absolute;
@@ -32,7 +33,19 @@
             background-size: 200% 100%;
             animation: colorShift 6s linear infinite;
         }
-        
+
+        .click-text {
+            position: absolute;
+            bottom: 20px;
+            font-size: 2rem;
+            text-transform: uppercase;
+            background-image: linear-gradient(to right, #55CDFC, #F5A9B8, #FFFFFF, #D52D00, #FF9B55, #FFFFFF);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-size: 200% 100%;
+            animation: colorShift 6s linear infinite;
+        }
+
         @keyframes colorShift {
             0% { background-position: -200% 50%; }
             100% { background-position: 200% 50%; }
@@ -41,6 +54,8 @@
 </head>
 <body>
     <div class="text">NOT EVEN A GOODBYE ...</div>
+    <div class="click-text">Click Me</div>
+    
     <script>
         const text = document.querySelector('.text');
         document.addEventListener('mousemove', (event) => {
@@ -55,12 +70,9 @@
             text.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
         });
 
-document.addEventListener("click", function() {
-    window.open("https://www.youtube.com/watch?v=8UVNT4wvIGY", "_blank"); 
-}, { once: true });
-
+        document.addEventListener("click", function() {
+            window.open("https://www.youtube.com/watch?v=8UVNT4wvIGY", "_blank"); 
+        }, { once: true });
     </script>
-
-    
 </body>
 </html>
