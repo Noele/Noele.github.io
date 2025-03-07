@@ -84,7 +84,7 @@
     <script>
         let player;
         let animationStarted = false;
-        let startTime, lastScale = 1;
+        let lastScale = 1;
         const maxScale = 6;
         const text = document.querySelector('.text');
 
@@ -119,8 +119,9 @@
         function onPlayerStateChange(event) {
             if (event.data === YT.PlayerState.PLAYING && !animationStarted) {
                 animationStarted = true;
-                console.log("Video started! Starting animation...");
-                startAnimationLoop();
+                let videoStartTime = player.getCurrentTime(); // Sync with YouTube video time
+                console.log("Video started at:", videoStartTime, "Starting animation...");
+                startAnimationLoop(videoStartTime);
             }
         }
 
@@ -128,11 +129,9 @@
             return start + (end - start) * t;
         }
 
-        function startAnimationLoop() {
-            startTime = Date.now(); // Set start time when video starts
-
+        function startAnimationLoop(videoStartTime) {
             function animateText() {
-                const elapsedTime = (Date.now() - startTime) / 1000;
+                let elapsedTime = player.getCurrentTime() - videoStartTime; // Get actual YouTube playback time
 
                 // Find the closest frequency data point
                 const closestDataPoint = frequencyData.reduce((prev, curr) => 
