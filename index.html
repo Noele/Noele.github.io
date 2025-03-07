@@ -87,6 +87,7 @@
         let lastScale = 1;
         const maxScale = 6;
         const text = document.querySelector('.text');
+        let videoStartTime = 0;
 
         // Load YouTube IFrame API
         var tag = document.createElement('script');
@@ -119,7 +120,7 @@
         function onPlayerStateChange(event) {
             if (event.data === YT.PlayerState.PLAYING && !animationStarted) {
                 animationStarted = true;
-                let videoStartTime = player.getCurrentTime(); // Sync with YouTube video time
+                videoStartTime = player.getCurrentTime(); // Sync with YouTube video time
                 console.log("Video started at:", videoStartTime, "Starting animation...");
                 startAnimationLoop(videoStartTime);
             }
@@ -149,6 +150,8 @@
         function startAnimationLoop(videoStartTime) {
             function animateText() {
                 let elapsedTime = Math.round(player.getCurrentTime() * 1000) / 1000 - videoStartTime; // Sync with actual time (rounded to seconds)
+
+                console.log("Elapsed Time:", elapsedTime);  // Log to check difference
 
                 let frequency = findInterpolatedFrequency(elapsedTime); // Get interpolated frequency
 
