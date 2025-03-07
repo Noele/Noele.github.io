@@ -148,7 +148,14 @@ function findInterpolatedFrequency(elapsedTime) {
     return lerp(before.frequency, after.frequency, t);
 }
 
+function smoothFrequencyChange(currentFrequency, lastFrequency) {
+    const smoothingFactor = 0.1;  // Controls how smoothly we transition between frequency values
+    return lerp(lastFrequency, currentFrequency, smoothingFactor);
+}
+
 function startAnimationLoop() {
+    let lastFrequency = 0;  // Store the last frequency value to apply smoothing
+
     function animateText() {
         // Get the current video time from the player
         const currentTime = player.getCurrentTime();
@@ -158,6 +165,9 @@ function startAnimationLoop() {
 
         // Use the elapsed time to get interpolated frequency
         let frequency = findInterpolatedFrequency(elapsedTime); 
+
+        // Apply smoothing to avoid abrupt changes in frequency
+        frequency = smoothFrequencyChange(frequency, lastFrequency);
 
         // Map frequency (0-1) to scale (1 to maxScale)
         let targetScale = 1 + frequency * (maxScale - 1);
@@ -169,7 +179,9 @@ function startAnimationLoop() {
         // Apply the scale to the text element
         text.style.transform = `scale(${finalScale})`;
 
-        lastScale = finalScale; // Update the last scale for smoothing
+        // Update the last scale and frequency values for smoothing
+        lastScale = finalScale;
+        lastFrequency = frequency;
 
         // Request the next animation frame
         requestAnimationFrame(animateText);
