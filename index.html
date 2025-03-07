@@ -94287,9 +94287,6 @@
         "frequency": -2.7020250854548067e-05
     }
 ];
-
-
-// Wait for the page to fully load before starting the animation
 window.onload = function () {
     // Start the custom clock once the page has fully loaded
     let startTime = Date.now(); // Start the clock from now
@@ -94312,10 +94309,19 @@ window.onload = function () {
         });
 
         // Pulse effect based on frequency (loudness)
-        const frequency = closestDataPoint.frequency;
+        let frequency = closestDataPoint.frequency;
+
+        // Amplify small frequency values for more sensitivity
+        if (frequency < 0.001) {
+            frequency *= 500; // Amplify very small numbers
+        } else if (frequency < 0.01) {
+            frequency *= 100; // Moderate amplification
+        } else if (frequency < 0.1) {
+            frequency *= 10;  // Mild amplification for still low numbers
+        }
 
         // Apply bias to frequency to give vocals and high-pitched sounds more weight
-        targetScale = 1 + Math.pow(frequency * 10, 1.5); // Adjust this factor for subtlety
+        targetScale = 1 + Math.pow(frequency, 1.5); // Adjust this factor for subtlety
 
         // Interpolate smoothly between lastScale and targetScale
         const scale = lerp(lastScale, targetScale, 0.1); // '0.1' is the smoothness factor
