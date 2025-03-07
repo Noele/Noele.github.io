@@ -87,43 +87,56 @@
         let lastScale = 1;
         const maxScale = 6;
         const text = document.querySelector('.text');
+const frequencyData = []; // Assume this is loaded from your JSON
+let lastTime = null;
+let lastScale = 1;
+let targetScale = 1;
+const maxScale = 6;
 
-        // Load YouTube IFrame API
-        var tag = document.createElement('script');
-        tag.src = "https://www.youtube.com/iframe_api";
-        var firstScriptTag = document.getElementsByTagName('script')[0];
-        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+// Function to find closest data point
+function findClosestDataPoint(currentTime) {
+    return frequencyData.reduce((prev, curr) =>
+        Math.abs(curr.time - currentTime) < Math.abs(prev.time - currentTime) ? curr : prev
+    );
+}
 
-        function onYouTubeIframeAPIReady() {
-            player = new YT.Player('player', {
-                height: '100%',
-                width: '100%',
-                videoId: 'CTspcr3Iaws',
-                playerVars: {
-                    autoplay: 1,
-                    mute: 1,
-                    loop: 1,
-                    playlist: 'CTspcr3Iaws'
-                },
-                events: {
-                    'onReady': onPlayerReady,
-                    'onStateChange': onPlayerStateChange
-                }
-            });
-        }
+// Function to smoothly transition between scales
+function lerp(start, end, t) {
+    return start + (end - start) * t;
+}
 
-        function onPlayerReady(event) {
-            console.log("YouTube Video Ready!");
-        }
+function animateText() {
+    if (!player || typeof player.getCurrentTime !== "function") return;
 
-        function onPlayerStateChange(event) {
-            if (event.data === YT.PlayerState.PLAYING && !animationStarted) {
-                animationStarted = true;
-                let videoStartTime = player.getCurrentTime(); // Sync with YouTube video time
-                console.log("Video started at:", videoStartTime, "Starting animation...");
-                startAnimationLoop(videoStartTime);
-            }
-        }
+    let currentTime = player.getCurrentTime(); // Get current video time
+    let closestDataPoint = findClosestDataPoint(currentTime);
+    let frequency = closestDataPoint.frequency;
+
+    // Log time differences
+    if (lastTime !== null) {
+        let timeDiff = currentTime - lastTime;
+        console.log(`Time diff: ${timeDiff.toFixed(3)}s`);
+    }
+    lastTime = currentTime;
+
+    // Map frequency (0-1) to scale (1 to maxScale)
+    targetScale = 1 + frequency * (maxScale - 1);
+    const scale = lerp(lastScale, targetScale, 0.1);
+    const finalScale = Math.min(scale, maxScale);
+
+    text.style.transform = `scale(${finalScale})`;
+    lastScale = finalScale;
+
+    requestAnimationFrame(animateText);
+}
+
+// Wait for the video to start before animating
+function onPlayerStateChange(event) {
+    if (event.data === YT.PlayerState.PLAYING) {
+        console.log("Video started!");
+        requestAnimationFrame(animateText);
+    }
+}
 
         function lerp(start, end, t) {
             return start + (end - start) * t;
