@@ -120,7 +120,7 @@
         function onPlayerStateChange(event) {
             if (event.data === YT.PlayerState.PLAYING && !animationStarted) {
                 animationStarted = true;
-                videoStartTime = player.getCurrentTime() -1; // Sync with YouTube video time
+                videoStartTime = player.getCurrentTime() +1; // Sync with YouTube video time
                 console.log("Video started at:", videoStartTime, "Starting animation...");
                 startAnimationLoop(videoStartTime);
             }
