@@ -1,173 +1,98 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NOT EVEN A GOODBYE ...</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap');
+let player;
+let animationStarted = false;
+let lastScale = 1;
+const maxScale = 4;
+const text = document.querySelector('.text');
+let videoStartTime = 0;
+let lastTime = 0; // For smooth synchronization
+
+// Load YouTube IFrame API
+var tag = document.createElement('script');
+tag.src = "https://www.youtube.com/iframe_api";
+var firstScriptTag = document.getElementsByTagName('script')[0];
+firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+function onYouTubeIframeAPIReady() {
+    player = new YT.Player('player', {
+        height: '100%',
+        width: '100%',
+        videoId: 'CTspcr3Iaws',
+        playerVars: {
+            autoplay: 1,
+            mute: 1,
+            loop: 1,
+            playlist: 'CTspcr3Iaws'
+        },
+        events: {
+            'onReady': onPlayerReady,
+            'onStateChange': onPlayerStateChange
+        }
+    });
+}
+
+function onPlayerReady(event) {
+    console.log("YouTube Video Ready!");
+}
+
+function onPlayerStateChange(event) {
+    if (event.data === YT.PlayerState.PLAYING && !animationStarted) {
+        animationStarted = true;
+        videoStartTime = player.getCurrentTime(); // Get the actual start time from the player
+        console.log("Video started at:", videoStartTime, "Starting animation...");
+        startAnimationLoop();
+    }
+}
+
+function lerp(start, end, t) {
+    return start + (end - start) * t;
+}
+
+function findInterpolatedFrequency(elapsedTime) {
+    let before = frequencyData[0];
+    let after = frequencyData[frequencyData.length - 1];
+
+    for (let i = 0; i < frequencyData.length - 1; i++) {
+        if (frequencyData[i].time <= elapsedTime && frequencyData[i + 1].time >= elapsedTime) {
+            before = frequencyData[i];
+            after = frequencyData[i + 1];
+            break;
+        }
+    }
+
+    // Interpolate between before and after
+    let t = (elapsedTime - before.time) / (after.time - before.time);
+    return lerp(before.frequency, after.frequency, t);
+}
+
+function startAnimationLoop() {
+    function animateText() {
+        // Get the current video time from the player
+        const currentTime = player.getCurrentTime();
         
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        // Calculate elapsed time relative to the video start time
+        const elapsedTime = currentTime - videoStartTime;
 
-        html, body {
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            font-family: 'Montserrat', sans-serif;
-        }
+        // Use the elapsed time to get interpolated frequency
+        let frequency = findInterpolatedFrequency(elapsedTime); 
 
-        /* Video Background */
-        .video-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
-            overflow: hidden;
-        }
+        // Map frequency (0-1) to scale (1 to maxScale)
+        let targetScale = 1 + frequency * (maxScale - 1);
 
-        .video-container iframe {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            border: none;
-            pointer-events: auto;
-        }
+        // Smooth transition using linear interpolation
+        const scale = lerp(lastScale, targetScale, 0.1);
+        const finalScale = Math.min(scale, maxScale);
 
-        /* Lowered Centered Text */
-        .content {
-            position: absolute;
-            top: 75%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
-            color: white;
-            text-transform: uppercase;
-            pointer-events: none;
-            perspective: 1000px;
-            z-index: 1;
-        }
+        // Apply the scale to the text element
+        text.style.transform = `scale(${finalScale})`;
 
-        .text {
-            font-size: 4rem;
-            background-image: linear-gradient(to right, #55CDFC, #F5A9B8, #FFFFFF, #D52D00, #FF9B55, #FFFFFF);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-size: 200% 100%;
-            animation: colorShift 6s linear infinite;
-            transform-origin: center;
-            transition: transform 0.1s ease-out;
-            display: inline-block;
-        }
+        lastScale = finalScale; // Update the last scale for smoothing
 
-        @keyframes colorShift {
-            0% { background-position: -200% 50%; }
-            100% { background-position: 200% 50%; }
-        }
-    </style>
-</head>
-<body>
+        // Request the next animation frame
+        requestAnimationFrame(animateText);
+    }
 
-    <div class="video-container">
-        <div id="player"></div>
-    </div>
-
-    <div class="content">
-        <div class="text">NOT EVEN A GOODBYE ...</div>
-    </div>
-
-    <script>
-        let player;
-        let animationStarted = false;
-        let lastScale = 1;
-        const maxScale = 4;
-        const text = document.querySelector('.text');
-        let videoStartTime = 0;
-
-        // Load YouTube IFrame API
-        var tag = document.createElement('script');
-        tag.src = "https://www.youtube.com/iframe_api";
-        var firstScriptTag = document.getElementsByTagName('script')[0];
-        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-
-        function onYouTubeIframeAPIReady() {
-            player = new YT.Player('player', {
-                height: '100%',
-                width: '100%',
-                videoId: 'CTspcr3Iaws',
-                playerVars: {
-                    autoplay: 1,
-                    mute: 1,
-                    loop: 1,
-                    playlist: 'CTspcr3Iaws'
-                },
-                events: {
-                    'onReady': onPlayerReady,
-                    'onStateChange': onPlayerStateChange
-                }
-            });
-        }
-
-        function onPlayerReady(event) {
-            console.log("YouTube Video Ready!");
-        }
-
-        function onPlayerStateChange(event) {
-            if (event.data === YT.PlayerState.PLAYING && !animationStarted) {
-                animationStarted = true;
-                videoStartTime = player.getCurrentTime() +1.25; // Sync with YouTube video time
-                console.log("Video started at:", videoStartTime, "Starting animation...");
-                startAnimationLoop(videoStartTime);
-            }
-        }
-
-        function lerp(start, end, t) {
-            return start + (end - start) * t;
-        }
-
-        function findInterpolatedFrequency(elapsedTime) {
-            let before = frequencyData[0];
-            let after = frequencyData[frequencyData.length - 1];
-
-            for (let i = 0; i < frequencyData.length - 1; i++) {
-                if (frequencyData[i].time <= elapsedTime && frequencyData[i + 1].time >= elapsedTime) {
-                    before = frequencyData[i];
-                    after = frequencyData[i + 1];
-                    break;
-                }
-            }
-
-            // Interpolate between before and after
-            let t = (elapsedTime - before.time) / (after.time - before.time);
-            return lerp(before.frequency, after.frequency, t);
-        }
-
-        function startAnimationLoop(videoStartTime) {
-            function animateText() {
-                let elapsedTime = Math.round(player.getCurrentTime() * 1000) / 1000 - videoStartTime; // Sync with actual time (rounded to seconds)
-
-                let frequency = findInterpolatedFrequency(elapsedTime); // Get interpolated frequency
-
-                // Map frequency (0-1) to scale (1 to maxScale)
-                let targetScale = 1 + frequency * (maxScale - 1);
-
-                // Smooth transition
-                const scale = lerp(lastScale, targetScale, 0.1);
-                const finalScale = Math.min(scale, maxScale);
-
-                text.style.transform = `scale(${finalScale})`;
-
-                lastScale = finalScale;
-                requestAnimationFrame(animateText);
-            }
-
-            animateText();
-        }
+    animateText();
+}
         const frequencyData = [
     {
         "time": 0.0,
