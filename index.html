@@ -94288,16 +94288,17 @@
         "frequency": 0.0
     }
 ];
-function startAnimation() {
+
+        function startAnimation() {
             const videoDuration = video.duration; // Get the total duration of the video
 
             // Update animation at regular intervals (e.g., every 100ms)
             setInterval(() => {
                 const currentTime = video.currentTime; // Get the current time of the video
-                const closestTimestamp = getClosestTimestamp(currentTime); // Get the closest timestamp in the data
+                const closestDataPoint = getClosestDataPoint(currentTime); // Get the closest data point in the data
 
-                // Get the frequency data for the closest timestamp
-                const frequency = frequencyData[closestTimestamp].frequency;
+                // Get the frequency from the closest data point
+                const frequency = closestDataPoint ? closestDataPoint.frequency : 0;
 
                 if (frequency !== undefined) {
                     // Use the frequency data to animate the text
@@ -94307,20 +94308,20 @@ function startAnimation() {
             }, 100); // Adjust the interval as needed
         }
 
-        function getClosestTimestamp(currentTime) {
+        function getClosestDataPoint(currentTime) {
             // Find the closest timestamp to the current time in the video
-            let closestTimestamp = frequencyData[0].timestamp;
-            let minDifference = Math.abs(currentTime - closestTimestamp);
+            let closestDataPoint = frequencyData[0];
+            let minDifference = Math.abs(currentTime - closestDataPoint.timestamp);
 
             frequencyData.forEach(dataPoint => {
                 const timeDifference = Math.abs(currentTime - dataPoint.timestamp);
                 if (timeDifference < minDifference) {
-                    closestTimestamp = dataPoint.timestamp;
+                    closestDataPoint = dataPoint;
                     minDifference = timeDifference;
                 }
             });
 
-            return closestTimestamp;
+            return closestDataPoint;
         }
 
         // Start animation once video is ready
