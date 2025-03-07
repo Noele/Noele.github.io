@@ -37,7 +37,7 @@
 
         .click-text {
             position: absolute;
-            bottom: 20px;
+            bottom: 80px;
             font-size: 2rem;
             text-transform: uppercase;
             background-image: linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet);
@@ -45,6 +45,15 @@
             -webkit-text-fill-color: transparent;
             background-size: 200% 100%;
             animation: colorShiftClick 6s linear infinite;
+        }
+
+        .video-container {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            padding: 10px 0;
         }
 
         @keyframes colorShift {
@@ -62,7 +71,18 @@
 <body>
     <div class="text">NOT EVEN A GOODBYE ...</div>
     <div class="click-text">Click Me</div>
-    
+
+    <div class="video-container">
+        <iframe 
+            width="560" 
+            height="315" 
+            src="https://www.youtube.com/embed/CTspcr3Iaws?autoplay=1&mute=1" 
+            frameborder="0" 
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+            allowfullscreen>
+        </iframe>
+    </div>
+
     <script>
         const text = document.querySelector('.text');
         document.addEventListener('mousemove', (event) => {
@@ -76,10 +96,6 @@
             const rotateY = deltaX * 40;
             text.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
         });
-
-        document.addEventListener("click", function() {
-            window.open("https://youtu.be/CTspcr3Iaws", "_blank"); 
-        }, { once: true });
     </script>
 </body>
 </html>
