@@ -36,6 +36,7 @@
             height: 100%;
             object-fit: cover;
             border: none;
+            pointer-events: auto; /* Ensure the video is clickable */
         }
 
         .video-container::before {
@@ -58,7 +59,7 @@
             text-align: center;
             color: white;
             text-transform: uppercase;
-            pointer-events: none; /* Prevent interaction with mouse */
+            pointer-events: none; /* Prevent interaction with mouse for the text */
             perspective: 1000px; /* Added perspective for depth */
         }
 
