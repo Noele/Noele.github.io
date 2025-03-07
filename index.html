@@ -94286,32 +94286,36 @@
         "frequency": 0.0
     }
 ];
+// Get the text element to animate
 const text = document.querySelector('.text');
-let startTime = Date.now(); // Start the custom clock
+
+// Start the custom clock
+let startTime = Date.now(); // Start the clock from now
+let animationFrameId;
 
 function animateText() {
     const elapsedTime = (Date.now() - startTime) / 1000; // Time in seconds
-
-    // Find the closest frequency data point to the current time
     const closestDataPoint = frequencyData.reduce((prev, curr) => {
         return Math.abs(curr.time - elapsedTime) < Math.abs(prev.time - elapsedTime) ? curr : prev;
     });
 
     // Pulse effect based on frequency
     const frequency = closestDataPoint.frequency;
-    // Using a smaller multiplier for even more subtle pulsation
-    const pulseIntensity = Math.sin(elapsedTime * Math.PI * 3); // Fast pulse with a sin function
-    const scale = 1 + (pulseIntensity * (frequency * 4)); // Further reduced scale multiplier
+    const pulseSpeed = 15; // Increase the pulse speed factor here for a faster effect
+    const scale = 1 + Math.sin(elapsedTime * Math.PI * pulseSpeed) * Math.pow(frequency * 40, 1.5); // Adjust pulse speed
 
     // Ensure the scale doesn't go below 1 (original size)
     text.style.transform = `scale(${Math.max(1, scale)})`;
 
     // Continue the animation loop
-    requestAnimationFrame(animateText);
+    animationFrameId = requestAnimationFrame(animateText);
 }
 
-// Start the animation
-animateText();
+// Start the animation when the video is loaded
+document.querySelector('video').addEventListener('loadeddata', function() {
+    animateText();
+});
+
     </script>
 
 </body>
