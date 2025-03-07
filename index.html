@@ -129,16 +129,28 @@
             return start + (end - start) * t;
         }
 
+        function findInterpolatedFrequency(elapsedTime) {
+            let before = frequencyData[0];
+            let after = frequencyData[frequencyData.length - 1];
+
+            for (let i = 0; i < frequencyData.length - 1; i++) {
+                if (frequencyData[i].time <= elapsedTime && frequencyData[i + 1].time >= elapsedTime) {
+                    before = frequencyData[i];
+                    after = frequencyData[i + 1];
+                    break;
+                }
+            }
+
+            // Interpolate between before and after
+            let t = (elapsedTime - before.time) / (after.time - before.time);
+            return lerp(before.frequency, after.frequency, t);
+        }
+
         function startAnimationLoop(videoStartTime) {
             function animateText() {
                 let elapsedTime = player.getCurrentTime() - videoStartTime; // Get actual YouTube playback time
 
-                // Find the closest frequency data point
-                const closestDataPoint = frequencyData.reduce((prev, curr) => 
-                    Math.abs(curr.time - elapsedTime) < Math.abs(prev.time - elapsedTime) ? curr : prev
-                );
-
-                let frequency = closestDataPoint.frequency || 0; // Default to 0 if no data
+                let frequency = findInterpolatedFrequency(elapsedTime); // Get interpolated frequency
 
                 // Map frequency (0-1) to scale (1 to maxScale)
                 let targetScale = 1 + frequency * (maxScale - 1);
