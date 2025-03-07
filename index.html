@@ -94295,6 +94295,7 @@ window.onload = function () {
     let startTime = Date.now(); // Start the clock from now
     let lastScale = 1; // Initial scale
     let targetScale = 1; // Target scale (starts at 1)
+    const maxScale = 3; // Maximum scale (text will not exceed this size)
 
     // Function to smoothly interpolate between two values
     function lerp(start, end, t) {
@@ -94319,11 +94320,14 @@ window.onload = function () {
         // Interpolate smoothly between lastScale and targetScale
         const scale = lerp(lastScale, targetScale, 0.1); // '0.1' is the smoothness factor
 
+        // Ensure the scale doesn't exceed maxScale
+        const finalScale = Math.min(scale, maxScale);
+
         // Apply the scale to the text element
-        text.style.transform = `scale(${Math.max(1, scale)})`;
+        text.style.transform = `scale(${Math.max(1, finalScale)})`;
 
         // Update lastScale for the next frame
-        lastScale = scale;
+        lastScale = finalScale;
 
         // Continue the animation loop
         requestAnimationFrame(animateText);
