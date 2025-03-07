@@ -27,7 +27,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: -1;
+            z-index: 0; /* Make sure the video stays behind the text */
             overflow: hidden;
         }
 
@@ -37,17 +37,6 @@
             object-fit: cover;
             border: none;
             pointer-events: auto; /* Ensure the video is clickable */
-        }
-
-        .video-container::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5); /* Semi-transparent dark overlay */
-            z-index: 1; /* Ensure it stays on top of the video but behind the text */
         }
 
         /* Lowered Centered Text */
@@ -61,6 +50,7 @@
             text-transform: uppercase;
             pointer-events: none; /* Prevent interaction with mouse for the text */
             perspective: 1000px; /* Added perspective for depth */
+            z-index: 1; /* Keep the text on top of the video */
         }
 
         .text {
