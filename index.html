@@ -104,8 +104,8 @@
     </div>
 
     <script>
-        // Fetch frequency data from the JSON file
-        fetch('frequency_data.json')
+        // Fetch frequency data from the GitHub Pages URL
+        fetch('https://noele.github.io/frequency_data.json')
             .then(response => response.json())
             .then(frequencyData => {
                 const text = document.querySelector('.text');
