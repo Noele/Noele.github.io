@@ -88,6 +88,7 @@
         <div class="text">NOT EVEN A GOODBYE ...</div>
     </div>
     <script>
+	const text = document.querySelector('.text');
         const frequencyData = [
     {
         "time": 0.0,
@@ -94287,12 +94288,18 @@
     }
 ];
 
-		
+
 // Wait for the page to fully load before starting the animation
 window.onload = function () {
-	const text = document.querySelector('.text');
     // Start the custom clock once the page has fully loaded
     let startTime = Date.now(); // Start the clock from now
+    let lastScale = 1; // Initial scale
+    let targetScale = 1; // Target scale (starts at 1)
+
+    // Function to smoothly interpolate between two values
+    function lerp(start, end, t) {
+        return start + (end - start) * t;
+    }
 
     function animateText() {
         // Get the current time elapsed
@@ -94306,15 +94313,17 @@ window.onload = function () {
         // Pulse effect based on frequency (loudness)
         const frequency = closestDataPoint.frequency;
 
-        // To focus more on vocals and higher-pitched frequencies, we'll:
-        // - Increase the effect of higher frequencies.
-        // - Reduce the effect of lower frequencies (background noise).
-        // - Apply a bias to make high-pitched frequencies more impactful.
-        // Reducing the pulsing intensity by 75%
-        const scale = 1 + Math.sin(elapsedTime * Math.PI * 4.5) * Math.pow(frequency * 15, 2); // Reduced pulse intensity by 75%
+        // Apply bias to frequency to give vocals and high-pitched sounds more weight
+        targetScale = 1 + Math.pow(frequency * 10, 1.5); // Adjust this factor for subtlety
 
-        // Ensure the scale doesn't go below 1 (original size)
+        // Interpolate smoothly between lastScale and targetScale
+        const scale = lerp(lastScale, targetScale, 0.1); // '0.1' is the smoothness factor
+
+        // Apply the scale to the text element
         text.style.transform = `scale(${Math.max(1, scale)})`;
+
+        // Update lastScale for the next frame
+        lastScale = scale;
 
         // Continue the animation loop
         requestAnimationFrame(animateText);
