@@ -127,10 +127,6 @@
         const bufferLength = analyser.frequencyBinCount;
         const dataArray = new Uint8Array(bufferLength);
 
-        // Store mouse data
-        let mouseRotationX = 0;
-        let mouseRotationY = 0;
-
         // Function to animate text based on audio frequency data
         function animateText() {
             analyser.getByteFrequencyData(dataArray);
@@ -141,8 +137,8 @@
             // Map the frequency average to text animation (e.g., text pulsing)
             const scale = 1 + (averageFrequency / 100); // Pulse scale factor based on frequency
 
-            // Apply pulsing animation to text and combine with mouse movement
-            text.style.transform = `scale(${scale}) rotateX(${mouseRotationX}deg) rotateY(${mouseRotationY}deg)`;
+            // Apply pulsing animation to text
+            text.style.transform = `scale(${scale})`;
 
             // Continue animation
             requestAnimationFrame(animateText);
@@ -154,16 +150,6 @@
                 animateText();
             });
         };
-
-        // Mouse move interaction
-        document.addEventListener('mousemove', (event) => {
-            const { clientX: x, clientY: y } = event;
-            const { innerWidth: width, innerHeight: height } = window;
-            const centerX = width / 2;
-            const centerY = height / 2;
-            mouseRotationX = (y - centerY) / centerY * -40; // Negative for reverse effect
-            mouseRotationY = (x - centerX) / centerX * 40;
-        });
     </script>
 
 </body>
