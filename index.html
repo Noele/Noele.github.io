@@ -21,6 +21,7 @@
             perspective: 800px;
             flex-direction: column;
         }
+
         .text {
             position: absolute;
             font-size: 4rem;
@@ -39,17 +40,23 @@
             bottom: 20px;
             font-size: 2rem;
             text-transform: uppercase;
-            background-image: linear-gradient(to right, #55CDFC, #F5A9B8, #FFFFFF, #D52D00, #FF9B55, #FFFFFF);
+            background-image: linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-size: 200% 100%;
-            animation: colorShift 6s linear infinite;
+            animation: colorShiftClick 6s linear infinite;
         }
 
         @keyframes colorShift {
             0% { background-position: -200% 50%; }
             100% { background-position: 200% 50%; }
         }
+
+        @keyframes colorShiftClick {
+            0% { background-position: -200% 50%; }
+            100% { background-position: 200% 50%; }
+        }
+
     </style>
 </head>
 <body>
