@@ -148,7 +148,7 @@
 
         function startAnimationLoop(videoStartTime) {
             function animateText() {
-                let elapsedTime = player.getCurrentTime() - videoStartTime; // Get actual YouTube playback time
+                let elapsedTime = Math.round(player.getCurrentTime() * 1000) / 1000 - videoStartTime; // Sync with actual time (rounded to seconds)
 
                 let frequency = findInterpolatedFrequency(elapsedTime); // Get interpolated frequency
 
