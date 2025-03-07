@@ -92,7 +92,7 @@
     <div class="video-container">
         <iframe 
             id="videoFrame"
-            src="https://www.youtube.com/embed/CTspcr3Iaws?autoplay=1&mute=1&loop=1&playlist=CTspcr3Iaws" 
+            src="https://www.youtube.com/embed/CTspcr3Iaws?autoplay=1&mute=0&loop=1&playlist=CTspcr3Iaws" 
             frameborder="0" 
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
             allowfullscreen>
@@ -104,45 +104,51 @@
     </div>
 
     <script>
-		const text = document.querySelector('.text');
-		const video = document.querySelector('#videoFrame');
-		const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-		const analyser = audioContext.createAnalyser();
-		const sourceNode = audioContext.createMediaElementSource(video);
+        const text = document.querySelector('.text');
+        const video = document.querySelector('#videoFrame');
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const analyser = audioContext.createAnalyser();
+        const sourceNode = audioContext.createMediaElementSource(video);
 
-		// Connect the video audio to the analyser
-		sourceNode.connect(analyser);
-		analyser.connect(audioContext.destination);
-		analyser.fftSize = 256; // Set FFT size (higher gives more detail)
+        // Connect the video audio to the analyser
+        sourceNode.connect(analyser);
+        analyser.connect(audioContext.destination);
+        analyser.fftSize = 256; // Set FFT size (higher gives more detail)
 
-		const bufferLength = analyser.frequencyBinCount;
-		const dataArray = new Uint8Array(bufferLength);
+        const bufferLength = analyser.frequencyBinCount;
+        const dataArray = new Uint8Array(bufferLength);
 
-		// Function to animate text based on audio frequency data
-		function animateText() {
-			analyser.getByteFrequencyData(dataArray);
+        // Function to animate text based on audio frequency data
+        function animateText() {
+            analyser.getByteFrequencyData(dataArray);
 
-			// Sum up frequencies (you can modify the calculation to adjust sensitivity)
-			const averageFrequency = dataArray.reduce((acc, value) => acc + value, 0) / bufferLength;
+            // Sum up frequencies (you can modify the calculation to adjust sensitivity)
+            const averageFrequency = dataArray.reduce((acc, value) => acc + value, 0) / bufferLength;
 
-			// Map the frequency average to text animation (e.g., text pulsing)
-			// You can change the formula to adjust the range of scaling based on frequency
-			const scale = 1 + (averageFrequency / 300); // Adjust divisor for more/less scale
+            // Map the frequency average to text animation (e.g., text pulsing)
+            const scale = 1 + (averageFrequency / 300); // Adjust divisor for more/less scale
 
-			// Apply pulsing animation to text
-			text.style.transform = `scale(${scale})`;
+            // Apply pulsing animation to text
+            text.style.transform = `scale(${scale})`;
 
-			// Continue animation
-			requestAnimationFrame(animateText);
-		}
+            // Continue animation
+            requestAnimationFrame(animateText);
+        }
 
-		// Play the video and start animation
-		video.onload = () => {
-			audioContext.resume().then(() => {
-				animateText();
-			});
-		};
+        // Ensure the video starts playing and then begin animation
+        video.onload = () => {
+            video.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+            audioContext.resume().then(() => {
+                animateText();
+            });
+        };
 
+        // Fallback for browsers requiring user interaction for audio to play
+        document.body.addEventListener('click', function() {
+            audioContext.resume().then(() => {
+                animateText();
+            });
+        });
     </script>
 
 </body>
