@@ -27,7 +27,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: 0; /* Make sure the video stays behind the text */
+            z-index: 0;
             overflow: hidden;
         }
 
@@ -36,21 +36,21 @@
             height: 100%;
             object-fit: cover;
             border: none;
-            pointer-events: auto; /* Ensure the video is clickable */
+            pointer-events: auto;
         }
 
         /* Lowered Centered Text */
         .content {
             position: absolute;
-            top: 75%; /* Moved lower down */
+            top: 75%;
             left: 50%;
             transform: translate(-50%, -50%);
             text-align: center;
             color: white;
             text-transform: uppercase;
-            pointer-events: none; /* Prevent interaction with mouse for the text */
-            perspective: 1000px; /* Added perspective for depth */
-            z-index: 1; /* Keep the text on top of the video */
+            pointer-events: none;
+            perspective: 1000px;
+            z-index: 1;
         }
 
         .text {
@@ -60,15 +60,16 @@
             -webkit-text-fill-color: transparent;
             background-size: 200% 100%;
             animation: colorShift 6s linear infinite;
-            transform-origin: center; /* Ensure the 3D effect centers on the text */
+            transform-origin: center;
             transition: transform 0.1s ease-out;
-            display: inline-block; /* Keep text inline-block to prevent movement */
+            display: inline-block;
         }
 
         @keyframes colorShift {
             0% { background-position: -200% 50%; }
             100% { background-position: 200% 50%; }
         }
+
     </style>
 </head>
 <body>
@@ -86,11 +87,7 @@
     <div class="content">
         <div class="text">NOT EVEN A GOODBYE ...</div>
     </div>
-
     <script>
-        const text = document.querySelector('.text');
-        const video = document.querySelector('#videoFrame');
-        
         const frequencyData = [
     {
         "time": 0.0,
@@ -94289,54 +94286,32 @@
         "frequency": 0.0
     }
 ];
+const text = document.querySelector('.text');
+let startTime = Date.now(); // Start the custom clock
 
-        function animateText() {
-            if (!video.contentWindow.document.querySelector('video').paused) {
-                const currentTime = video.contentWindow.document.querySelector('video').currentTime;
+function animateText() {
+    const elapsedTime = (Date.now() - startTime) / 1000; // Time in seconds
 
-                if (currentTime) {
-                    const closestDataPoint = getClosestDataPoint(currentTime);
-                    if (closestDataPoint) {
-                        const frequency = closestDataPoint.frequency;
-                        console.log(`Current Time: ${currentTime}, Frequency: ${frequency}`); // Debug: Log current time and frequency
+    // Find the closest frequency data point to the current time
+    const closestDataPoint = frequencyData.reduce((prev, curr) => {
+        return Math.abs(curr.time - elapsedTime) < Math.abs(prev.time - elapsedTime) ? curr : prev;
+    });
 
-                        // Use the frequency data to animate the text
-                        const scale = 1 + (frequency / 100); // Pulse scale factor based on frequency
-                        text.style.transform = `scale(${scale})`;
-                    }
-                }
-                // Continue the animation
-                requestAnimationFrame(animateText);
-            } else {
-                // Wait until the video is playing
-                setTimeout(animateText, 100);
-            }
-        }
+    // Pulse effect based on frequency
+    const frequency = closestDataPoint.frequency;
+    // Using a smaller multiplier for even more subtle pulsation
+    const pulseIntensity = Math.sin(elapsedTime * Math.PI * 3); // Fast pulse with a sin function
+    const scale = 1 + (pulseIntensity * (frequency * 4)); // Further reduced scale multiplier
 
-        function getClosestDataPoint(currentTime) {
-            let closestDataPoint = frequencyData[0];
-            let minDifference = Math.abs(currentTime - closestDataPoint.timestamp);
+    // Ensure the scale doesn't go below 1 (original size)
+    text.style.transform = `scale(${Math.max(1, scale)})`;
 
-            frequencyData.forEach(dataPoint => {
-                const timeDifference = Math.abs(currentTime - dataPoint.timestamp);
-                if (timeDifference < minDifference) {
-                    closestDataPoint = dataPoint;
-                    minDifference = timeDifference;
-                }
-            });
+    // Continue the animation loop
+    requestAnimationFrame(animateText);
+}
 
-            return closestDataPoint;
-        }
-
-        // Start animation once video is ready
-        video.onload = () => {
-            animateText();
-        };
-
-        // In case video is already loaded, run animation
-        if (video.readyState >= 2) {
-            animateText();
-        }
+// Start the animation
+animateText();
     </script>
 
 </body>
