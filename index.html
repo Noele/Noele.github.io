@@ -94287,36 +94287,46 @@
     }
 ];
 	const text = document.querySelector('.text');
-	let startTime = Date.now(); // Start the clock from now
+		
+	// Wait for the iframe to load before starting the animation
+	const videoIframe = document.querySelector('iframe');
 
-	function animateText() {
-		// Get the current time elapsed
-		const elapsedTime = (Date.now() - startTime) / 1000; // Time in seconds
+	function onIframeLoad() {
+		// Start the custom clock once the video has loaded
+		let startTime = Date.now(); // Start the clock from now
 
-		// Find the closest frequency data point to the current time
-		const closestDataPoint = frequencyData.reduce((prev, curr) => {
-			return Math.abs(curr.time - elapsedTime) < Math.abs(prev.time - elapsedTime) ? curr : prev;
-		});
+		function animateText() {
+			// Get the current time elapsed
+			const elapsedTime = (Date.now() - startTime) / 1000; // Time in seconds
 
-		// Pulse effect based on frequency (loudness)
-		const frequency = closestDataPoint.frequency;
+			// Find the closest frequency data point to the current time
+			const closestDataPoint = frequencyData.reduce((prev, curr) => {
+				return Math.abs(curr.time - elapsedTime) < Math.abs(prev.time - elapsedTime) ? curr : prev;
+			});
 
-		// To focus more on vocals and higher-pitched frequencies, we'll:
-		// - Increase the effect of higher frequencies.
-		// - Reduce the effect of lower frequencies (background noise).
-		// - Apply a bias to make high-pitched frequencies more impactful.
-		// Reducing the pulsing intensity by 75%
-		const scale = 1 + Math.sin(elapsedTime * Math.PI * 4.5) * Math.pow(frequency * 15, 2); // Reduced pulse intensity by 75%
+			// Pulse effect based on frequency (loudness)
+			const frequency = closestDataPoint.frequency;
 
-		// Ensure the scale doesn't go below 1 (original size)
-		text.style.transform = `scale(${Math.max(1, scale)})`;
+			// To focus more on vocals and higher-pitched frequencies, we'll:
+			// - Increase the effect of higher frequencies.
+			// - Reduce the effect of lower frequencies (background noise).
+			// - Apply a bias to make high-pitched frequencies more impactful.
+			// Reducing the pulsing intensity by 75%
+			const scale = 1 + Math.sin(elapsedTime * Math.PI * 4.5) * Math.pow(frequency * 15, 2); // Reduced pulse intensity by 75%
 
-		// Continue the animation loop
-		requestAnimationFrame(animateText);
+			// Ensure the scale doesn't go below 1 (original size)
+			text.style.transform = `scale(${Math.max(1, scale)})`;
+
+			// Continue the animation loop
+			requestAnimationFrame(animateText);
+		}
+
+		// Start the animation after iframe has loaded
+		animateText();
 	}
 
-	// Start the animation when the page loads
-	animateText();   
+	// Attach the onload event listener to the iframe
+	videoIframe.addEventListener('load', onIframeLoad);
 </script>
 
 </body>
