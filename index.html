@@ -82,15 +82,13 @@
     </div>
 
     <script>
-let player;
+        let player;
 let animationStarted = false;
 let lastScale = 1;
 const maxScale = 4;
 const text = document.querySelector('.text');
 let videoStartTime = 0;
-let lastFrequency = 0; // Store last frequency for smooth transitions
-let frequencyThreshold = 0.2; // Minimum frequency change to trigger scaling
-let smoothingFactor = 0.1; // How much smoothing to apply
+let lastTime = 0; // For smooth synchronization
 
 // Load YouTube IFrame API
 var tag = document.createElement('script');
@@ -123,7 +121,7 @@ function onPlayerReady(event) {
 function onPlayerStateChange(event) {
     if (event.data === YT.PlayerState.PLAYING && !animationStarted) {
         animationStarted = true;
-        videoStartTime = player.getCurrentTime();
+        videoStartTime = player.getCurrentTime(); // Get the actual start time from the player
         console.log("Video started at:", videoStartTime, "Starting animation...");
         startAnimationLoop();
     }
@@ -145,45 +143,44 @@ function findInterpolatedFrequency(elapsedTime) {
         }
     }
 
+    // Interpolate between before and after
     let t = (elapsedTime - before.time) / (after.time - before.time);
     return lerp(before.frequency, after.frequency, t);
 }
 
 function smoothFrequencyChange(currentFrequency, lastFrequency) {
+    const smoothingFactor = 0.1;  // Controls how smoothly we transition between frequency values
     return lerp(lastFrequency, currentFrequency, smoothingFactor);
 }
 
 function startAnimationLoop() {
-    function animateText() {
-        // Get the current video time
-        const currentTime = player.getCurrentTime();
+    let lastFrequency = 0;  // Store the last frequency value to apply smoothing
 
-        // Calculate elapsed time since video start
+    function animateText() {
+        // Get the current video time from the player
+        const currentTime = player.getCurrentTime();
+        
+        // Calculate elapsed time relative to the video start time
         const elapsedTime = currentTime - videoStartTime;
 
-        // Get interpolated frequency
-        let frequency = findInterpolatedFrequency(elapsedTime);
+        // Use the elapsed time to get interpolated frequency
+        let frequency = findInterpolatedFrequency(elapsedTime); 
 
-        // Apply smoothing to frequency
+        // Apply smoothing to avoid abrupt changes in frequency
         frequency = smoothFrequencyChange(frequency, lastFrequency);
 
-        // Only scale if frequency exceeds the threshold
-        if (Math.abs(frequency - lastFrequency) > frequencyThreshold) {
-            // Map frequency (0-1) to scale (1 to maxScale)
-            let targetScale = 1 + frequency * (maxScale - 1);
-            
-            // Smooth scaling transition
-            const scale = lerp(lastScale, targetScale, 0.1);
-            const finalScale = Math.min(scale, maxScale);
-            
-            // Apply the scale to the text element
-            text.style.transform = `scale(${finalScale})`;
+        // Map frequency (0-1) to scale (1 to maxScale)
+        let targetScale = 1 + frequency * (maxScale - 1);
 
-            // Update last scale for next frame
-            lastScale = finalScale;
-        }
+        // Smooth transition using linear interpolation
+        const scale = lerp(lastScale, targetScale, 0.1);
+        const finalScale = Math.min(scale, maxScale);
 
-        // Store current frequency for next frame's smoothing
+        // Apply the scale to the text element
+        text.style.transform = `scale(${finalScale})`;
+
+        // Update the last scale and frequency values for smoothing
+        lastScale = finalScale;
         lastFrequency = frequency;
 
         // Request the next animation frame
@@ -192,7 +189,6 @@ function startAnimationLoop() {
 
     animateText();
 }
-
 
         const frequencyData = [
     {
