@@ -94290,23 +94290,27 @@
     }
 ];
 
-        function startAnimation() {
-            const videoDuration = video.duration; // Get the total duration of the video
+        function animateText() {
+            if (!video.contentWindow.document.querySelector('video').paused) {
+                const currentTime = video.contentWindow.document.querySelector('video').currentTime;
 
-            // Update animation at regular intervals (e.g., every 100ms)
-            setInterval(() => {
-                const currentTime = video.currentTime; // Get the current time of the video
-                const closestDataPoint = getClosestDataPoint(currentTime); // Get the closest data point in the data
+                if (currentTime) {
+                    const closestDataPoint = getClosestDataPoint(currentTime);
+                    if (closestDataPoint) {
+                        const frequency = closestDataPoint.frequency;
+                        console.log(`Current Time: ${currentTime}, Frequency: ${frequency}`); // Debug: Log current time and frequency
 
-                if (closestDataPoint) {
-                    const frequency = closestDataPoint.frequency;
-                    console.log(`Current Time: ${currentTime}, Frequency: ${frequency}`); // Debug: Log current time and frequency
-
-                    // Use the frequency data to animate the text
-                    const scale = 1 + (frequency / 100); // Pulse scale factor based on frequency
-                    text.style.transform = `scale(${scale})`;
+                        // Use the frequency data to animate the text
+                        const scale = 1 + (frequency / 100); // Pulse scale factor based on frequency
+                        text.style.transform = `scale(${scale})`;
+                    }
                 }
-            }, 100); // Adjust the interval as needed
+                // Continue the animation
+                requestAnimationFrame(animateText);
+            } else {
+                // Wait until the video is playing
+                setTimeout(animateText, 100);
+            }
         }
 
         function getClosestDataPoint(currentTime) {
@@ -94326,12 +94330,12 @@
 
         // Start animation once video is ready
         video.onload = () => {
-            startAnimation();
+            animateText();
         };
 
         // In case video is already loaded, run animation
         if (video.readyState >= 2) {
-            startAnimation();
+            animateText();
         }
     </script>
 
