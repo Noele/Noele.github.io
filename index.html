@@ -94286,33 +94286,38 @@
         "frequency": 0.0
     }
 ];
+	const text = document.querySelector('.text');
+	let startTime = Date.now(); // Start the clock from now
 
-// Start the custom clock
-let startTime = Date.now(); // Start the clock from now
-let animationFrameId;
+	function animateText() {
+		// Get the current time elapsed
+		const elapsedTime = (Date.now() - startTime) / 1000; // Time in seconds
 
-function animateText() {
-    const elapsedTime = (Date.now() - startTime) / 1000; // Time in seconds
-    const closestDataPoint = frequencyData.reduce((prev, curr) => {
-        return Math.abs(curr.time - elapsedTime) < Math.abs(prev.time - elapsedTime) ? curr : prev;
-    });
+		// Find the closest frequency data point to the current time
+		const closestDataPoint = frequencyData.reduce((prev, curr) => {
+			return Math.abs(curr.time - elapsedTime) < Math.abs(prev.time - elapsedTime) ? curr : prev;
+		});
 
-    // Pulse effect based on loudness
-    const loudness = closestDataPoint.frequency;
-    const pulseSpeed = 10; // Pulse speed factor
-    const scale = 1 + Math.sin(elapsedTime * Math.PI * pulseSpeed) * Math.pow(loudness * 20, 1.5); // Adjust the scale based on loudness
+		// Pulse effect based on frequency (loudness)
+		const frequency = closestDataPoint.frequency;
 
-    // Ensure the scale doesn't go below 1 (original size)
-    text.style.transform = `scale(${Math.max(1, scale)})`;
+		// To focus more on vocals and higher-pitched frequencies, we'll:
+		// - Increase the effect of higher frequencies.
+		// - Reduce the effect of lower frequencies (background noise).
+		// - Apply a bias to make high-pitched frequencies more impactful.
+		// Reducing the pulsing intensity by 75%
+		const scale = 1 + Math.sin(elapsedTime * Math.PI * 4.5) * Math.pow(frequency * 15, 2); // Reduced pulse intensity by 75%
 
-    // Continue the animation loop
-    animationFrameId = requestAnimationFrame(animateText);
-}
+		// Ensure the scale doesn't go below 1 (original size)
+		text.style.transform = `scale(${Math.max(1, scale)})`;
 
-// Start the animation
-animateText();
+		// Continue the animation loop
+		requestAnimationFrame(animateText);
+	}
 
-    </script>
+	// Start the animation when the page loads
+	animateText();   
+</script>
 
 </body>
 </html>
