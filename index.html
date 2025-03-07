@@ -90,6 +90,7 @@
     <script>
         const text = document.querySelector('.text');
         const video = document.querySelector('#videoFrame');
+        
         const frequencyData = [
     {
         "time": 0.0,
@@ -94297,10 +94298,10 @@
                 const currentTime = video.currentTime; // Get the current time of the video
                 const closestDataPoint = getClosestDataPoint(currentTime); // Get the closest data point in the data
 
-                // Get the frequency from the closest data point
-                const frequency = closestDataPoint ? closestDataPoint.frequency : 0;
+                if (closestDataPoint) {
+                    const frequency = closestDataPoint.frequency;
+                    console.log(`Current Time: ${currentTime}, Frequency: ${frequency}`); // Debug: Log current time and frequency
 
-                if (frequency !== undefined) {
                     // Use the frequency data to animate the text
                     const scale = 1 + (frequency / 100); // Pulse scale factor based on frequency
                     text.style.transform = `scale(${scale})`;
@@ -94309,7 +94310,6 @@
         }
 
         function getClosestDataPoint(currentTime) {
-            // Find the closest timestamp to the current time in the video
             let closestDataPoint = frequencyData[0];
             let minDifference = Math.abs(currentTime - closestDataPoint.timestamp);
 
@@ -94328,6 +94328,11 @@
         video.onload = () => {
             startAnimation();
         };
+
+        // In case video is already loaded, run animation
+        if (video.readyState >= 2) {
+            startAnimation();
+        }
     </script>
 
 </body>
