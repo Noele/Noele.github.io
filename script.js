@@ -10,13 +10,11 @@ async function GeneratePDF() {
     const { width, height } = page.getSize();
     const newPage = pdfDoc.addPage([width, height]);
 
-    // 3. Get values from form
     const name = document.getElementById('playerName').value;
     const playerID = document.getElementById('playerID').value;
     const dob = document.getElementById('playerDOB').value;
     const deck = document.getElementById('playerDeck').value;
 
-    // 4. Write text to PDF (x/y = coordinates from bottom-left)
     page.drawText(name, { x: 90, y: 715, size: 16, color: rgb(0, 0, 0) });
     page.drawText(playerID, { x: 280, y: 715, size: 14, color: rgb(0, 0, 0) });
     const [month, day, year] = dob.split("/");
