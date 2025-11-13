@@ -1,32 +1,10 @@
 import { PDFDocument, rgb } from 'https://cdn.skypack.dev/pdf-lib';
 
 document.getElementById('generatePDFButton').addEventListener('click', GeneratePDF);
-async function makeGrid(pdfBytes) {
-    const pdfDoc = await PDFDocument.load(pdfBytes);
-    const page = pdfDoc.getPages()[0];
-    const { width, height } = page.getSize();
 
-    // Draw grid lines every 50 points
-    for (let x = 0; x < width; x += 50) {
-        page.drawText(`${x}`, { x, y: 10, size: 8, color: rgb(0.8, 0, 0) });
-        page.drawLine({ start: { x, y: 0 }, end: { x, y: height }, thickness: 0.2, color: rgb(0.8, 0.8, 0.8) });
-    }
-    for (let y = 0; y < height; y += 50) {
-        page.drawText(`${y}`, { x: 2, y, size: 8, color: rgb(0.8, 0, 0) });
-        page.drawLine({ start: { x: 0, y }, end: { x: width, y }, thickness: 0.2, color: rgb(0.8, 0.8, 0.8) });
-    }
-
-    const newBytes = await pdfDoc.save();
-    const blob = new Blob([newBytes], { type: 'application/pdf' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = 'grid.pdf';
-    link.click();
-}
 async function GeneratePDF() {
     const existingPdfBytes = await fetch('./form.pdf').then(res => res.arrayBuffer());
-    makeGrid(existingPdfBytes)
-
+    
     const pdfDoc = await PDFDocument.load(existingPdfBytes);
     let page = pdfDoc.getPages()[0];
     const { width, height } = page.getSize();
