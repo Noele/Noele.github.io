@@ -24,12 +24,13 @@ async function makeGrid(pdfBytes) {
     link.click();
 }
 async function GeneratePDF() {
-    // 1. Load local PDF template
     const existingPdfBytes = await fetch('./form.pdf').then(res => res.arrayBuffer());
-    //makeGrid(existingPdfBytes)
-    // 2. Load the PDF
+    makeGrid(existingPdfBytes)
+
     const pdfDoc = await PDFDocument.load(existingPdfBytes);
-    const page = pdfDoc.getPages()[0];
+    let page = pdfDoc.getPages()[0];
+    const { width, height } = page.getSize();
+    const newPage = pdfDoc.addPage([width, height]);
 
     // 3. Get values from form
     const name = document.getElementById('playerName').value;
@@ -51,20 +52,34 @@ async function GeneratePDF() {
     let pokemonCount = 0;
     let trainerCount = 0;
     let energyCount = 0;
+
     let counts = [pokemonCount, trainerCount, energyCount];
+    let paged = [false, false, false]
 
     let pokemonYAxis = 585;
     let trainerYAxis = 409;
     let energyYAxis = 127;
 
+    let pagedPokemonYAxis = 725;
+    let pagedTrainerYAxis = 475;
+    let pagedEnergyYAxis = 175;
+
+
     let axis = [pokemonYAxis, trainerYAxis, energyYAxis];
+    let pagedAxis = [pagedPokemonYAxis, pagedTrainerYAxis, pagedEnergyYAxis];
 
     let QuantityXAxis = 272;
     let NameXAxis = 295;
     let SetXAxis = 466;
     let CollectorNumberXAxis = 505;
+
     let offset = 13;
 
+    newPage.drawText("Pokemon", { x: 0, y: 750, size: 14, color: rgb(0, 0, 0) });
+    newPage.drawText("Trainers", { x: 0, y: 500, size: 14, color: rgb(0, 0, 0) });
+    newPage.drawText("Energy", { x: 0, y: 200, size: 14, color: rgb(0, 0, 0) });
+
+    let currentPage = page
     for(let line of deck.split('\n')) {
         if(line === '') continue;
         if(line.startsWith('Pokémon:')) {
@@ -77,7 +92,21 @@ async function GeneratePDF() {
             section = 2
         }
         else {
-            if(section === -1) continue; // skip until a section is found
+            if(section === -1) continue;
+            let lineIsPaged = 0; // used to set x axis to 0 if we are on a new page
+            let currentAxis = axis[section];
+            if ((section === 0 && counts[section] >= 10) || (section === 1 && counts[section] >= 18) || (section === 2 && counts[section] >= 4) || paged[section]) {
+                currentPage = newPage
+                if(!paged[section]) {
+                    counts[section] = 0;
+                }
+                paged[section] = true;
+                lineIsPaged = 1;
+                currentAxis = pagedAxis[section];
+            } else {
+                currentPage = page
+            }
+
             const parts = line.trim().split(" ");
             const quantity = parts[0];
             const collectorNumber = parts[parts.length - 1];
@@ -85,17 +114,16 @@ async function GeneratePDF() {
             const name = parts.slice(1, parts.length - 2).join(" ");
 
 
-            page.drawText(quantity, { x: QuantityXAxis, y: axis[section] - (counts[section] * offset), size: 14, color: rgb(0, 0, 0) });
-            page.drawText(name, { x: NameXAxis, y: axis[section] - (counts[section] * offset), size: 14, color: rgb(0, 0, 0) });
+            currentPage.drawText(quantity, { x: QuantityXAxis - (QuantityXAxis * lineIsPaged), y: currentAxis - (counts[section] * offset), size: 14, color: rgb(0, 0, 0) });
+            currentPage.drawText(name, { x: NameXAxis - (QuantityXAxis * lineIsPaged), y: currentAxis - (counts[section] * offset), size: 14, color: rgb(0, 0, 0) });
             if (section === 0) {
-                page.drawText(set, {x: SetXAxis, y: axis[section] - (counts[section] * offset), size: 10, color: rgb(0, 0, 0)});
-                page.drawText(collectorNumber, {x: CollectorNumberXAxis, y: axis[section] - (counts[section] * offset), size: 10, color: rgb(0, 0, 0)});
+                currentPage.drawText(set, {x: SetXAxis - (QuantityXAxis * lineIsPaged), y: currentAxis - (counts[section] * offset), size: 10, color: rgb(0, 0, 0)});
+                currentPage.drawText(collectorNumber, {x: CollectorNumberXAxis - (QuantityXAxis * lineIsPaged), y: currentAxis - (counts[section] * offset), size: 10, color: rgb(0, 0, 0)});
             }
             counts[section] += 1;
         }
     }
 
-    // 5. Save and download
     const pdfBytes = await pdfDoc.save();
     const blob = new Blob([pdfBytes], { type: 'application/pdf' });
     const link = document.createElement('a');
