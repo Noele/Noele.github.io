@@ -1,0 +1,105 @@
+import { PDFDocument, rgb } from 'https://cdn.skypack.dev/pdf-lib';
+
+document.getElementById('generatePDFButton').addEventListener('click', GeneratePDF);
+async function makeGrid(pdfBytes) {
+    const pdfDoc = await PDFDocument.load(pdfBytes);
+    const page = pdfDoc.getPages()[0];
+    const { width, height } = page.getSize();
+
+    // Draw grid lines every 50 points
+    for (let x = 0; x < width; x += 50) {
+        page.drawText(`${x}`, { x, y: 10, size: 8, color: rgb(0.8, 0, 0) });
+        page.drawLine({ start: { x, y: 0 }, end: { x, y: height }, thickness: 0.2, color: rgb(0.8, 0.8, 0.8) });
+    }
+    for (let y = 0; y < height; y += 50) {
+        page.drawText(`${y}`, { x: 2, y, size: 8, color: rgb(0.8, 0, 0) });
+        page.drawLine({ start: { x: 0, y }, end: { x: width, y }, thickness: 0.2, color: rgb(0.8, 0.8, 0.8) });
+    }
+
+    const newBytes = await pdfDoc.save();
+    const blob = new Blob([newBytes], { type: 'application/pdf' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'grid.pdf';
+    link.click();
+}
+async function GeneratePDF() {
+    // 1. Load local PDF template
+    const existingPdfBytes = await fetch('./form.pdf').then(res => res.arrayBuffer());
+    //makeGrid(existingPdfBytes)
+    // 2. Load the PDF
+    const pdfDoc = await PDFDocument.load(existingPdfBytes);
+    const page = pdfDoc.getPages()[0];
+
+    // 3. Get values from form
+    const name = document.getElementById('playerName').value;
+    const playerID = document.getElementById('playerID').value;
+    const dob = document.getElementById('playerDOB').value;
+    const deck = document.getElementById('playerDeck').value;
+
+    // 4. Write text to PDF (x/y = coordinates from bottom-left)
+    page.drawText(name, { x: 90, y: 715, size: 16, color: rgb(0, 0, 0) });
+    page.drawText(playerID, { x: 280, y: 715, size: 14, color: rgb(0, 0, 0) });
+    const [month, day, year] = dob.split("/");
+
+    page.drawText(month, { x: 490, y: 715, size: 14, color: rgb(0, 0, 0) });
+    page.drawText(day, { x: 520, y: 715, size: 14, color: rgb(0, 0, 0) });
+    page.drawText(year, { x: 545, y: 715, size: 14, color: rgb(0, 0, 0) });
+
+    let section = -1;
+
+    let pokemonCount = 0;
+    let trainerCount = 0;
+    let energyCount = 0;
+    let counts = [pokemonCount, trainerCount, energyCount];
+
+    let pokemonYAxis = 585;
+    let trainerYAxis = 409;
+    let energyYAxis = 127;
+
+    let axis = [pokemonYAxis, trainerYAxis, energyYAxis];
+
+    let QuantityXAxis = 272;
+    let NameXAxis = 295;
+    let SetXAxis = 466;
+    let CollectorNumberXAxis = 505;
+    let offset = 13;
+
+    for(let line of deck.split('\n')) {
+        if(line === '') continue;
+        if(line.startsWith('Pokémon:')) {
+            section = 0
+        }
+        else if(line.startsWith('Trainer:')) {
+            section = 1
+        }
+        else if(line.startsWith('Energy:')) {
+            section = 2
+        }
+        else {
+            if(section === -1) continue; // skip until a section is found
+            const parts = line.trim().split(" ");
+            const quantity = parts[0];
+            const collectorNumber = parts[parts.length - 1];
+            const set = parts[parts.length - 2];
+            const name = parts.slice(1, parts.length - 2).join(" ");
+
+
+            page.drawText(quantity, { x: QuantityXAxis, y: axis[section] - (counts[section] * offset), size: 14, color: rgb(0, 0, 0) });
+            page.drawText(name, { x: NameXAxis, y: axis[section] - (counts[section] * offset), size: 14, color: rgb(0, 0, 0) });
+            if (section === 0) {
+                page.drawText(set, {x: SetXAxis, y: axis[section] - (counts[section] * offset), size: 10, color: rgb(0, 0, 0)});
+                page.drawText(collectorNumber, {x: CollectorNumberXAxis, y: axis[section] - (counts[section] * offset), size: 10, color: rgb(0, 0, 0)});
+            }
+            counts[section] += 1;
+        }
+    }
+
+    // 5. Save and download
+    const pdfBytes = await pdfDoc.save();
+    const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'filled_pdf.pdf';
+    link.click();
+}
