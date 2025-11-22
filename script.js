@@ -57,7 +57,7 @@ async function GeneratePDF() {
 
     let currentPage = page
     for(let line of deck.split('\n')) {
-        if(line === '') continue;
+        if(line === '' || line.includes("Total Cards:")) continue;
         if(line.startsWith('Pokémon:')) {
             section = 0
         }
